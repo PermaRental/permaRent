@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@ethsign/sign-protocol-evm':
+        specifier: ^1.1.1
+        version: 1.1.1
+      '@openzeppelin/contracts':
+        specifier: ^5.1.0
+        version: 5.1.0
       hardhat:
         specifier: ^2.22.15
         version: 2.22.15(ts-node@10.9.2(@types/node@22.9.0)(typescript@5.6.3))(typescript@5.6.3)
@@ -180,6 +186,9 @@ packages:
 
   '@ethersproject/wordlists@5.7.0':
     resolution: {integrity: sha512-S2TFNJNfHWVHNE6cNDjbVlZ6MgE17MIxMbMg2zv3wn+3XSJGosL1m9ZVv3GXCf/2ymSsQ+hRI5IzoMJTG6aoVA==}
+
+  '@ethsign/sign-protocol-evm@1.1.1':
+    resolution: {integrity: sha512-ldbWofDEMY0v8l8EF/2aa0fV2mEyRXlm54it6PNwYkeKuNuosY/CWuBgK8P7tMb0K5HS1gOuplMRC6Ky3VoXPw==}
 
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
@@ -391,6 +400,17 @@ packages:
   '@nomicfoundation/solidity-analyzer@0.1.2':
     resolution: {integrity: sha512-q4n32/FNKIhQ3zQGGw5CvPF6GTvDCpYwIf7bEY/dZTZbgfDsHyjJwURxUJf3VQuuJj+fDIFl4+KkBVbw4Ef6jA==}
     engines: {node: '>= 12'}
+
+  '@openzeppelin/contracts-upgradeable@5.0.1':
+    resolution: {integrity: sha512-MvaLoPnVcoZr/qqZP+4cl9piuR4gg0iIGgxVSZ/AL1iId3M6IdEHzz9Naw5Lirl4KKBI6ciTVnX07yL4dOMIJg==}
+    peerDependencies:
+      '@openzeppelin/contracts': 5.0.1
+
+  '@openzeppelin/contracts@5.0.1':
+    resolution: {integrity: sha512-yQJaT5HDp9hYOOp4jTYxMsR02gdFZFXhewX5HW9Jo4fsqSVqqyIO/xTHdWDaKX5a3pv1txmf076Lziz+sO7L1w==}
+
+  '@openzeppelin/contracts@5.1.0':
+    resolution: {integrity: sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==}
 
   '@scure/base@1.1.9':
     resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
@@ -2362,6 +2382,11 @@ snapshots:
       '@ethersproject/properties': 5.7.0
       '@ethersproject/strings': 5.7.0
 
+  '@ethsign/sign-protocol-evm@1.1.1':
+    dependencies:
+      '@openzeppelin/contracts': 5.0.1
+      '@openzeppelin/contracts-upgradeable': 5.0.1(@openzeppelin/contracts@5.0.1)
+
   '@fastify/busboy@2.1.1': {}
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -2588,6 +2613,14 @@ snapshots:
       '@nomicfoundation/solidity-analyzer-linux-x64-gnu': 0.1.2
       '@nomicfoundation/solidity-analyzer-linux-x64-musl': 0.1.2
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.2
+
+  '@openzeppelin/contracts-upgradeable@5.0.1(@openzeppelin/contracts@5.0.1)':
+    dependencies:
+      '@openzeppelin/contracts': 5.0.1
+
+  '@openzeppelin/contracts@5.0.1': {}
+
+  '@openzeppelin/contracts@5.1.0': {}
 
   '@scure/base@1.1.9': {}
 

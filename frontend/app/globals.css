@@ -16,3 +16,16 @@ body {
 .button {
 	@apply relative text-white bg-sky-600 text-base font-bold transition-colors px-4 py-2 rounded-lg select-none hover:bg-sky-500 focus:outline-none;
 }
+.button-icon {
+	@apply relative text-white bg-sky-600 text-2xl transition-colors p-6 rounded-full select-none hover:bg-sky-500 focus:outline-none;
+}
+.button-icon > svg {
+	@apply w-8 h-8;
+}
+
+.perma-account > * {
+	@apply flex-col gap-4 items-center;
+}
+.perma-account [data-testid='ockAddress'] {
+	@apply text-white text-2xl font-bold;
+}

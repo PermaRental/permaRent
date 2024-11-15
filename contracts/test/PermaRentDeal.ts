@@ -6,7 +6,7 @@ import hre from "hardhat";
 describe("PermaRentDeal", function () {
   async function deployPermaRentDealFixture() {
     const [owner, lessor, lessee, otherAccount] = await hre.ethers.getSigners();
-
+    let schemaId = 0;
     const prpToken = await hre.ethers.getContractFactory("PermaReputationPoints");
     const paymentToken = await hre.ethers.getContractFactory("MockUSDC");
     const hook = await hre.ethers.getContractFactory("PermaSPHook");
@@ -42,8 +42,27 @@ describe("PermaRentDeal", function () {
           { name: "cipherKey", type: "string"},
         ]),
       }, "0x");
-    console.log(schemaTx)
-    const schemaId = 1234;
+    const schemaReceipt = await schemaTx.wait();
+    for (const log of schemaReceipt.logs) {
+      try {
+        // Attempt to parse the log with the contract's interface
+        const parsedLog = signProtocolInstance.interface.parseLog(log);
+        console.log("Decoded Log:", parsedLog);
+  
+        // Access specific information from the parsed log
+        console.log("Event Name:", parsedLog.name);
+        console.log("Event Args:", parsedLog.args);
+  
+        // Example: Access a specific argument by name
+        if (parsedLog.name === "SchemaRegistered") {
+          schemaId = parsedLog.args.schemaId;
+        }
+      } catch (e) {
+        // Not all logs are related to this contract, so skip those that can't be parsed
+        console.log("Log could not be parsed by this contract's interface.");
+      }
+    }
+
 
     const rentalAmount = hre.ethers.parseEther("1");
     const securityDeposit = hre.ethers.parseEther("5");
@@ -59,16 +78,43 @@ describe("PermaRentDeal", function () {
       dealHash,
     };
 
-    const PermaRentDeal = await hre.ethers.getContractFactory("PermaRentDeal");
-    const permaRentDeal = await PermaRentDeal.deploy(
+    const PermaRent = await hre.ethers.getContractFactory("PermaRent");
+    const PermaRentInstance = await PermaRent.deploy(
       signProtocolInstance.target,
+      hookInstance.target,
       prpTokenInstance.target,
-      paymentTokenInstance.target,
       worldVerifierInstance.target,
+      schemaId
+    );
+
+    await hookInstance.setPerma(PermaRentInstance.target);
+    const permaRentDealTx = await PermaRentInstance.deployDeal(
+      paymentTokenInstance.target,
       lessor.address,
-      schemaId,
       dealTerms
     );
+    const permaRentDealReceipt = await permaRentDealTx.wait();
+    let permaRentDealAddress = "";
+    for (const log of permaRentDealReceipt.logs) {
+      try {
+        // Attempt to parse the log with the contract's interface
+        const parsedLog = PermaRentInstance.interface.parseLog(log);
+        console.log("Decoded Log:", parsedLog);
+  
+        // Access specific information from the parsed log
+        console.log("Event Name:", parsedLog.name);
+        console.log("Event Args:", parsedLog.args);
+  
+        // Example: Access a specific argument by name
+        if (parsedLog.name === "DealCreated") {
+          permaRentDealAddress = parsedLog.args.deal;
+        }
+      } catch (e) {
+        // Not all logs are related to this contract, so skip those that can't be parsed
+        console.log("Log could not be parsed by this contract's interface.");
+      }
+    }
+    const permaRentDeal = await hre.ethers.getContractAt("PermaRentDeal", permaRentDealAddress);    
 
     await paymentTokenInstance.mint(lessee.address, hre.ethers.parseEther("100"));
     await paymentTokenInstance.connect(lessee).approve(permaRentDeal.target, hre.ethers.parseEther("100"));
@@ -174,9 +220,11 @@ describe("PermaRentDeal", function () {
 
   describe("Cipher Key Management", function () {
     it("Lessee should be able to set cipher key after approval", async function () {
-      const { permaRentDeal, lessee } = await loadFixture(deployPermaRentDealFixture);
+      const { permaRentDeal, lessor, lessee } = await loadFixture(deployPermaRentDealFixture);
 
       await permaRentDeal.connect(lessee).signDealAsLessee(1, 12, [0, 0, 0, 0, 0, 0, 0, 0]);
+      await permaRentDeal.connect(lessor).approveDealForLessee(lessee.address, 1, 11, [0, 0, 0, 0, 0, 0, 0, 0]);
+
       await permaRentDeal.connect(lessee).setCipherKey("myCipherKey");
 
       expect(await permaRentDeal.cipherKey()).to.equal("myCipherKey");

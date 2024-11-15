@@ -7,13 +7,22 @@ import {PermaReputationPoints} from "./PermaReputationPoints.sol";
 import {IWorldVerifier} from "./interfaces/IWorldVerifier.sol";
 import {UnauthorizedAttester} from "./error.sol";
 
-contract PermaSPHook is ISPHook, Ownable(msg.sender) {
+contract PermaSPHook is ISPHook, Ownable {
     mapping(address attester => bool allowed) public whitelist;
+    address perma;
 
+    constructor() Ownable(msg.sender) {}
 
-    constructor() {}
+    function setPerma(address _perma) public onlyOwner {
+        perma = _perma;
+    }
 
-    function setWhitelist(address attester, bool allowed) external onlyOwner {
+    modifier onlyPerma() {
+        require(msg.sender == perma, "PermaSPHook: only perma");
+        _;
+    }
+
+    function setWhitelist(address attester, bool allowed) public onlyPerma {
         whitelist[attester] = allowed;
     }
 
@@ -40,7 +49,10 @@ contract PermaSPHook is ISPHook, Ownable(msg.sender) {
         uint256 resolverFeeERC20Amount,
         bytes calldata extraData
     ) external {
-        (address lessor, address lessee) = abi.decode(extraData, (address, address));
+        (address lessor, address lessee) = abi.decode(
+            extraData,
+            (address, address)
+        );
         _checkAttesterWhitelistStatus(attester);
         PermaReputationPoints(address(resolverFeeERC20Token)).mint(
             lessor,

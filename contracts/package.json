@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "hardhat run scripts/deploy.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +17,8 @@
     "@openzeppelin/contracts-upgradeable": "^5.1.0",
     "dotenv": "^16.4.5",
     "hardhat": "^2.22.15",
-    "hardhat-contract-sizer": "^2.10.0"
+    "hardhat-contract-sizer": "^2.10.0",
+    "viem": "^2.21.44"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

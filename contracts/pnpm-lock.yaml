@@ -29,6 +29,9 @@ importers:
       hardhat-contract-sizer:
         specifier: ^2.10.0
         version: 2.10.0(hardhat@2.22.15(ts-node@10.9.2(@types/node@22.9.0)(typescript@5.6.3))(typescript@5.6.3))
+      viem:
+        specifier: ^2.21.44
+        version: 2.21.44(typescript@5.6.3)
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.0

@@ -10,7 +10,7 @@ export default buildModule("PermaRent", (m) => {
     const spHookAddress = m.getParameter("spHookAddress", ZeroAddress);
     const spHook = m.contractAt("PermaSPHook", spHookAddress, {});
     const permaRent = m.contract("PermaRent", [spAddress, spHookAddress, PRPAddress, worldVerifierAddress, schemaId]);
-    m.call(spHook, "setPerma", [permaRent, true]);
+    m.call(spHook, "setPerma", [permaRent]);
 
     return { permaRent };
 });

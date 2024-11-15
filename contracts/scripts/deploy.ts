@@ -12,16 +12,15 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 async function main() {
     let spHookContract, permaRentDealApprovedSchema;
-    let PRPContract, worldVerifierContract, permaRentContract;
+    let PRPContract, worldVerifierContract, keySetSchema;
+    const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+    const client = new SignProtocolClient
+    (SpMode.OnChain, {
+        chain: EvmChains.baseSepolia,
+        account: account, // optional
+    });
     if (!process.env.PERMA_RENT_SCHEMA) {
         const { spHook } = await hre.ignition.deploy(PermaSPHook, {});
-        const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
-        const client = new SignProtocolClient
-            (SpMode.OnChain, {
-                chain: EvmChains.baseSepolia,
-                account: account, // optional
-            });
-
         permaRentDealApprovedSchema = await client.createSchema({
             name: "permaRentDealApproved",
             registrant: account.address as `0x${string}`,
@@ -30,14 +29,13 @@ async function main() {
             hook: spHook.target as `0x${string}`,
             data: [
                 { name: "lessor", type: "address" },
-                { name: "lesseeAddress", type: "address" },
+                { name: "lessee", type: "address" },
                 { name: "totalInitialPayment", type: "uint256" },
-                { name: "terms.totalRentalPeriods", type: "uint256" },
-                { name: "terms.rentalAmount", type: "uint256" },
-                { name: "terms.securityDeposit", type: "uint256" },
-                { name: "terms.paymentInterval", type: "uint256" },
-                { name: "terms.dealHash", type: "string" },
-                { name: "cipherKey", type: "string" },
+                { name: "totalRentalPeriods", type: "uint256" },
+                { name: "rentalAmount", type: "uint256" },
+                { name: "securityDeposit", type: "uint256" },
+                { name: "paymentInterval", type: "uint256" },
+                { name: "dealHash", type: "string" },
             ]
         })
         spHookContract = spHook;
@@ -47,7 +45,24 @@ async function main() {
         permaRentDealApprovedSchema = { schemaId: process.env.PERMA_RENT_SCHEMA };
         spHookContract = await hre.ethers.getContractAt("PermaSPHook", process.env.HOOK_ADDRESS as string);
     }
-
+    if (!process.env.KEY_SCHEMA_ID) {
+        
+        keySetSchema = await client.createSchema({
+            name: "permaRentKeySet",
+            registrant: account.address as `0x${string}`,
+            dataLocation: DataLocationOnChain.ONCHAIN,
+            revocable: true,
+            data: [
+                { name: "lessor", type: "address" },
+                { name: "lessee", type: "address" },
+                { name: "cipherKey", type: "string" },
+                { name: "keyHash", type: "string" },
+            ]
+        })
+        console.log('keySetSchema:', keySetSchema.schemaId);
+    }else{
+        keySetSchema = { schemaId: process.env.KEY_SCHEMA_ID };
+    }
     if (!process.env.PRP_ADDRESS) {
         const { PRP } = await hre.ignition.deploy(PermaReputationPoints, {
             parameters: {
@@ -80,6 +95,7 @@ async function main() {
         parameters: {
             PermaRent: {
                 schemaId: permaRentDealApprovedSchema.schemaId,
+                keySchemaId: keySetSchema.schemaId,
                 worldVerifierAddress: worldVerifierContract.target as string,
                 spAddress: process.env.SIGN_PROTOCOL_ADDRESS as string,
                 PRPAddress: PRPContract.target as string,

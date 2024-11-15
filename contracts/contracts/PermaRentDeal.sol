@@ -17,13 +17,20 @@ contract PermaRentDeal {
     ISP public signProtocol;
     IWorldVerifier public worldVerifier;
     uint64 public immutable schemaId;
+    uint64 public immutable setKeySchemaId;
     uint256 public startDate;
     uint256 public agreedRefundAmount = 0; // 出租方設定的押金返還金額
     uint256 public refundClaimed = 0; // 記錄已退還的押金金額
     uint256 public currentPeriod = 0; // 目前已支付的租金期數
     uint256 public failedPayments = 0; // 支付失敗的次數
     uint64 public approvedAttestationId = 0; // 出租方批准的 attestationId
-    string public cipherKey;
+    uint64 public keySetAttestationId = 0; // 出租方批准的 attestationId
+
+    struct Key {
+        string cipherKey;
+        string keyHash;
+    }
+    Key public key;
 
     struct DealTerms {
         uint256 rentalAmount; // 每期租金金額
@@ -42,33 +49,37 @@ contract PermaRentDeal {
 
     mapping(address => Lessee) public lessees; // 儲存每個 lessee 的簽署和批准狀態
 
-    event DealSignedByLessee(address indexed lessee);
+    event DealSignedByLessee(address indexed deal, address indexed lessee);
     event DealApprovedByLessor(
+        address indexed deal, 
         address indexed lessor,
         address indexed lessee,
         uint256 startDate,
         uint256 attestationId
     );
     event PaymentMade(
+        address indexed deal, 
         address indexed payer,
         uint256 amount,
         uint256 period,
         uint256 timestamp
     );
     event PaymentFailed(
+        address indexed deal, 
         address indexed lessee,
         uint256 amount,
         uint256 period,
         uint256 timestamp
     );
-    event DepositRefundSetted(address indexed lessor, uint256 refundAmount);
+    event DepositRefundSetted(address indexed deal, address indexed lessor, uint256 refundAmount);
     event DepositRefunded(
+        address indexed deal, 
         address indexed lessee,
         uint256 refundAmount,
         uint256 remainingDeposit
     );
-    event DealTerminated(address indexed initiator, uint256 timestamp);
-    event CipherKeySet(address indexed user, string cipherKey);
+    event DealTerminated(address indexed deal, address indexed initiator, uint256 timestamp);
+    event CipherKeySet(address indexed deal, address indexed lessee, string cipherKey, string keyHash);
 
     constructor(
         address _signProtocol,
@@ -77,6 +88,7 @@ contract PermaRentDeal {
         address _worldVerifier,
         address _lessor,
         uint64 _schemaId,
+        uint64 _setKeySchemaId,
         DealTerms memory _terms
     ) {
         paymentToken = IERC20(_paymentToken);
@@ -85,6 +97,7 @@ contract PermaRentDeal {
         worldVerifier = IWorldVerifier(_worldVerifier);
         lessor = _lessor;
         schemaId = _schemaId;
+        setKeySchemaId = _setKeySchemaId;
         terms = _terms;
     }
 
@@ -132,7 +145,7 @@ contract PermaRentDeal {
             proof
         );
         lessees[msg.sender].signed = true;
-        emit DealSignedByLessee(msg.sender);
+        emit DealSignedByLessee(address(this), msg.sender);
     }
 
     function approveDealForLessee(
@@ -192,8 +205,7 @@ contract PermaRentDeal {
                 terms.rentalAmount,
                 terms.securityDeposit,
                 terms.paymentInterval,
-                terms.dealHash,
-                cipherKey
+                terms.dealHash
             )
         });
         attestation.recipients[0] = (abi.encode(lesseeAddress));
@@ -201,26 +213,20 @@ contract PermaRentDeal {
             attestation,
             prpToken,
             1,
-            string(
-                abi.encodePacked(
-                    Strings.toHexString(uint256(uint160(address(this)))),
-                    "_",
-                    Strings.toString(uint256(uint160(lessor))),
-                    "_",
-                    Strings.toHexString(uint256(uint160(lesseeAddress)))
-                )
-            ),
+            Strings.toHexString(uint256(uint160(address(this)))),
             "",
             abi.encode(lessor, lesseeAddress)
         );
 
         emit DealApprovedByLessor(
+            address(this), 
             lessor,
             lesseeAddress,
             startDate,
             approvedAttestationId
         );
         emit PaymentMade(
+            address(this), 
             lesseeAddress,
             terms.rentalAmount,
             currentPeriod,
@@ -245,6 +251,7 @@ contract PermaRentDeal {
             currentPeriod++;
             failedPayments = 0;
             emit PaymentMade(
+                address(this), 
                 msg.sender,
                 terms.rentalAmount,
                 currentPeriod,
@@ -253,6 +260,7 @@ contract PermaRentDeal {
         } else {
             failedPayments++;
             emit PaymentFailed(
+                address(this), 
                 msg.sender,
                 terms.rentalAmount,
                 currentPeriod + 1,
@@ -269,7 +277,7 @@ contract PermaRentDeal {
         );
 
         agreedRefundAmount = refundAmount;
-        emit DepositRefundSetted(lessor, refundAmount);
+        emit DepositRefundSetted(address(this), lessor, refundAmount);
     }
 
     function claimRefund() external onlyApprovedLessee {
@@ -284,7 +292,7 @@ contract PermaRentDeal {
         }
 
         isDealActive = false;
-        emit DepositRefunded(msg.sender, agreedRefundAmount, remainingDeposit);
+        emit DepositRefunded(address(this), msg.sender, agreedRefundAmount, remainingDeposit);
     }
 
     function terminateDeal() external onlyLessor {
@@ -301,14 +309,48 @@ contract PermaRentDeal {
             "",
             abi.encode(lessor, finalLessee)
         );
-        emit DealTerminated(msg.sender, block.timestamp);
+        emit DealTerminated(address(this), msg.sender, block.timestamp);
     }
 
-    function setCipherKey(string calldata _cipherKey) external {
+    function setCipherKey(Key calldata _cipherKey) external {
         require(
             finalLessee == msg.sender && isDealActive,
             "Only the lessee can set the cipher key"
         );
-        cipherKey = _cipherKey;
+        key = _cipherKey;
+        if (keySetAttestationId != 0) {
+            signProtocol.revoke(
+                uint64(keySetAttestationId),
+                "",
+                "",
+                ""
+            );
+        }
+        Attestation memory attestation = Attestation({
+            schemaId: setKeySchemaId,
+            linkedAttestationId: approvedAttestationId,
+            attestTimestamp: uint64(block.timestamp),
+            revokeTimestamp: 0,
+            attester: address(this),
+            validUntil: 0,
+            dataLocation: DataLocation.ONCHAIN,
+            revoked: true,
+            recipients: new bytes[](1),
+            data: abi.encode(
+                lessor,
+                finalLessee,
+                key.cipherKey,
+                key.keyHash
+            )
+        });
+        attestation.recipients[0] = (abi.encode(finalLessee));
+        keySetAttestationId = signProtocol.attest(
+            attestation,
+            Strings.toHexString(uint256(uint160(address(this)))),
+            "",
+            abi.encode(lessor, finalLessee)
+        );
+
+        emit CipherKeySet(address(this), finalLessee, key.cipherKey, key.keyHash);
     }
 }

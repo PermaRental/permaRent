@@ -9,7 +9,8 @@ contract PermaRent {
     address spHook;
     address prpToken;
     address worldVerifier;
-    uint64 schemaId;
+    uint64 approvedSchemaId;
+    uint64 setKeySchemaId;
     event DealCreated(
         address indexed deal,
         address indexed paymentToken,
@@ -23,13 +24,15 @@ contract PermaRent {
         address _spHook,
         address _prpToken,
         address _worldVerifier,
-        uint64 _schemaId
+        uint64 _approvedSchemaId,
+        uint64 _setKeySchemaId
     ) {
         signProtocol = _signProtocol;
         spHook = _spHook;
         prpToken = _prpToken;
         worldVerifier = _worldVerifier;
-        schemaId = _schemaId;
+        approvedSchemaId = _approvedSchemaId;
+        setKeySchemaId = _setKeySchemaId;
     }
 
     function deployDeal(
@@ -43,7 +46,8 @@ contract PermaRent {
             _paymentToken,
             worldVerifier,
             _lessor,
-            schemaId,
+            approvedSchemaId,
+            setKeySchemaId,
             _terms
         );
         IPermaSPHook(spHook).setWhitelist(address(newDeal), true);

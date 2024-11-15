@@ -7,6 +7,7 @@ describe("PermaRentDeal", function () {
   async function deployPermaRentDealFixture() {
     const [owner, lessor, lessee, otherAccount] = await hre.ethers.getSigners();
     let schemaId = 0;
+    let keySchemaId = 0;
     const prpToken = await hre.ethers.getContractFactory("PermaReputationPoints");
     const paymentToken = await hre.ethers.getContractFactory("MockUSDC");
     const hook = await hre.ethers.getContractFactory("PermaSPHook");
@@ -32,14 +33,13 @@ describe("PermaRentDeal", function () {
         timestamp: 0n,
         data: JSON.stringify([
           { name: "lessor", type: "address"},
-          { name: "lesseeAddress", type: "address"},
+          { name: "lessee", type: "address"},
           { name: "totalInitialPayment", type: "uint256"},
-          { name: "terms.totalRentalPeriods", type: "uint256"},
-          { name: "terms.rentalAmount", type: "uint256"},
-          { name: "terms.securityDeposit", type: "uint256"},
-          { name: "terms.paymentInterval", type: "uint256"},
-          { name: "terms.dealHash", type: "string"},
-          { name: "cipherKey", type: "string"},
+          { name: "totalRentalPeriods", type: "uint256"},
+          { name: "rentalAmount", type: "uint256"},
+          { name: "securityDeposit", type: "uint256"},
+          { name: "paymentInterval", type: "uint256"},
+          { name: "dealHash", type: "string"},
         ]),
       }, "0x");
     const schemaReceipt = await schemaTx.wait();
@@ -56,6 +56,41 @@ describe("PermaRentDeal", function () {
         // Example: Access a specific argument by name
         if (parsedLog.name === "SchemaRegistered") {
           schemaId = parsedLog.args.schemaId;
+        }
+      } catch (e) {
+        // Not all logs are related to this contract, so skip those that can't be parsed
+        console.log("Log could not be parsed by this contract's interface.");
+      }
+    }
+    const keySchemaTx = await signProtocolInstance.register(
+      {
+        registrant: owner.address,
+        dataLocation: 0,
+        revocable: true,
+        maxValidFor: 0n,
+        hook: hookInstance.target,
+        timestamp: 0n,
+        data: JSON.stringify([
+          { name: "lessor", type: "address"},
+          { name: "lessee", type: "address"},
+          { name: "cipherKey", type: "string"},
+          { name: "keyHash", type: "string"},
+        ]),
+      }, "0x");
+    const keySchemaReceipt = await keySchemaTx.wait();
+    for (const log of keySchemaReceipt.logs) {
+      try {
+        // Attempt to parse the log with the contract's interface
+        const parsedLog = signProtocolInstance.interface.parseLog(log);
+        console.log("Decoded Log:", parsedLog);
+  
+        // Access specific information from the parsed log
+        console.log("Event Name:", parsedLog.name);
+        console.log("Event Args:", parsedLog.args);
+  
+        // Example: Access a specific argument by name
+        if (parsedLog.name === "SchemaRegistered") {
+          keySchemaId = parsedLog.args.schemaId;
         }
       } catch (e) {
         // Not all logs are related to this contract, so skip those that can't be parsed
@@ -84,7 +119,8 @@ describe("PermaRentDeal", function () {
       hookInstance.target,
       prpTokenInstance.target,
       worldVerifierInstance.target,
-      schemaId
+      schemaId,
+      keySchemaId
     );
 
     await hookInstance.setPerma(PermaRentInstance.target);
@@ -145,7 +181,7 @@ describe("PermaRentDeal", function () {
       const { permaRentDeal, lessee } = await loadFixture(deployPermaRentDealFixture);
       await expect(permaRentDeal.connect(lessee).signDealAsLessee(1, 1, [0, 0, 0, 0, 0, 0, 0, 0]))
         .to.emit(permaRentDeal, "DealSignedByLessee")
-        .withArgs(lessee.address);
+        .withArgs(permaRentDeal.target, lessee.address);
     });
 
     it("Lessor should approve the deal for the lessee", async function () {
@@ -154,7 +190,7 @@ describe("PermaRentDeal", function () {
 
       await expect(permaRentDeal.connect(lessor).approveDealForLessee(lessee.address, 1, 3, [0, 0, 0, 0, 0, 0, 0, 0]))
         .to.emit(permaRentDeal, "DealApprovedByLessor")
-        .withArgs(lessor.address, lessee.address, anyValue, anyValue);
+        .withArgs(permaRentDeal.target, lessor.address, lessee.address, anyValue, anyValue);
     });
   });
 
@@ -169,7 +205,7 @@ describe("PermaRentDeal", function () {
 
       await expect(permaRentDeal.connect(lessee).makePayment())
         .to.emit(permaRentDeal, "PaymentMade")
-        .withArgs(lessee.address, dealTerms.rentalAmount, 1, anyValue);
+        .withArgs(permaRentDeal.target, lessee.address, dealTerms.rentalAmount, 1, anyValue);
     });
 
     it("Should record failed payment if lessee lacks balance", async function () {
@@ -183,7 +219,7 @@ describe("PermaRentDeal", function () {
 
       await expect(permaRentDeal.connect(lessee).makePayment())
         .to.emit(permaRentDeal, "PaymentFailed")
-        .withArgs(lessee.address, dealTerms.rentalAmount, 1, anyValue);
+        .withArgs(permaRentDeal.target, lessee.address, dealTerms.rentalAmount, 1, anyValue);
     });
   });
 
@@ -198,7 +234,7 @@ describe("PermaRentDeal", function () {
 
       await expect(permaRentDeal.connect(lessee).claimRefund())
         .to.emit(permaRentDeal, "DepositRefunded")
-        .withArgs(lessee.address, dealTerms.securityDeposit, 0);
+        .withArgs(permaRentDeal.target, lessee.address, dealTerms.securityDeposit, 0);
     });
 
     it("Should allow lessor to terminate the deal after failed payment", async function () {
@@ -214,7 +250,7 @@ describe("PermaRentDeal", function () {
 
       await expect(permaRentDeal.connect(lessor).terminateDeal())
         .to.emit(permaRentDeal, "DealTerminated")
-        .withArgs(lessor.address, anyValue);
+        .withArgs(permaRentDeal.target, lessor.address, anyValue);
     });
   });
 
@@ -225,9 +261,10 @@ describe("PermaRentDeal", function () {
       await permaRentDeal.connect(lessee).signDealAsLessee(1, 12, [0, 0, 0, 0, 0, 0, 0, 0]);
       await permaRentDeal.connect(lessor).approveDealForLessee(lessee.address, 1, 11, [0, 0, 0, 0, 0, 0, 0, 0]);
 
-      await permaRentDeal.connect(lessee).setCipherKey("myCipherKey");
-
-      expect(await permaRentDeal.cipherKey()).to.equal("myCipherKey");
+      await permaRentDeal.connect(lessee).setCipherKey({cipherKey:"myCipherKey",keyHash:"myKeyHash"});
+      const key = await permaRentDeal.key();
+      expect(key.cipherKey).to.equal("myCipherKey");
+      expect(key.keyHash).to.equal("myKeyHash");
     });
   });
 });

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import cx from 'classnames';
-import LeaseList from '@/components/LeaseList';
+import LessorDeals from '@/components/LessorDeals';
+import LesseeDeals from '@/components/LesseeDeals';
 
 const Tabs: React.FC<{
-	activeItem: 'lessor' | 'lessee';
-	setActiveItem: (role: 'lessor' | 'lessee') => void;
-}> = ({ activeItem, setActiveItem }) => {
+	role: 'lessor' | 'lessee';
+	setRole: (role: 'lessor' | 'lessee') => void;
+}> = ({ role, setRole }) => {
 	const handleClick = (role: 'lessor' | 'lessee') => {
-		setActiveItem(role);
+		setRole(role);
 	};
 
 	return (
@@ -16,23 +17,23 @@ const Tabs: React.FC<{
 				className={cx(
 					'flex-1 font-bold transition-colors px-4 py-2 rounded-full select-none',
 					{
-						'text-white bg-slate-500': activeItem === 'lessor',
+						'text-white bg-slate-500': role === 'lessor',
 					}
 				)}
 				onClick={() => handleClick('lessor')}
 			>
-				Lessor
+				Lease
 			</button>
 			<button
 				className={cx(
 					'flex-1 font-bold transition-colors px-4 py-2 rounded-full select-none',
 					{
-						'text-white bg-slate-500': activeItem === 'lessee',
+						'text-white bg-slate-500': role === 'lessee',
 					}
 				)}
 				onClick={() => handleClick('lessee')}
 			>
-				Rental
+				Tenancy
 			</button>
 		</div>
 	);
@@ -42,10 +43,23 @@ export default function DealList() {
 	const [role, setRole] = useState<'lessor' | 'lessee'>('lessor');
 	return (
 		<>
-			<Tabs activeItem={role} setActiveItem={setRole} />
+			<Tabs role={role} setRole={setRole} />
 
-			<div className="tab-content">
-				<LeaseList />
+			<div className="tab-content grid grid-cols-1 grid-row-1">
+				<LessorDeals
+					classNames={
+						role === 'lessor'
+							? 'opacity-1 pointer-events-auto'
+							: 'opacity-0 pointer-events-none'
+					}
+				/>
+				<LesseeDeals
+					classNames={
+						role === 'lessee'
+							? 'opacity-1 pointer-events-auto'
+							: 'opacity-0 pointer-events-none'
+					}
+				/>
 			</div>
 		</>
 	);

@@ -9,20 +9,22 @@ const pinata = new PinataSDK({
 
 // Define the props type
 type IPFSUploaderProps = {
+	ipfsHash: string;
 	selectedFiles: File[];
 	showUploadBtn?: boolean;
 	isUpload?: boolean;
+	setIpfsHash: (ipfsHash: string) => void;
 	setContractParams: (contractParams: string) => void;
 };
 
 const IPFSUploader: React.FC<IPFSUploaderProps> = ({
+	ipfsHash,
 	selectedFiles,
 	showUploadBtn = true,
 	isUpload = false,
+	setIpfsHash,
 	setContractParams,
 }) => {
-	const [ipfsHash, setIpfsHash] = useState('');
-
 	const uploadFileToPinataMutate = useMutation({
 		mutationKey: ['update-files-to-pinata', selectedFiles],
 		mutationFn: async () => {

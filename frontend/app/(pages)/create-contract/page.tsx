@@ -12,6 +12,7 @@ Modal.setAppElement('#perma-create-contract');
 
 export default function CreateContractPage() {
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
+	const [ipfsHash, setIpfsHash] = useState<string>('');
 	const [isUpload, setIsUpload] = useState<boolean>(false);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -63,6 +64,8 @@ export default function CreateContractPage() {
 								}}
 							/>
 							<IPFSUploader
+								ipfsHash={ipfsHash}
+								setIpfsHash={setIpfsHash}
 								selectedFiles={selectedFiles}
 								setContractParams={setContractParams}
 							/>
@@ -88,6 +91,8 @@ export default function CreateContractPage() {
 								className="object-cover"
 							/>
 							<IPFSUploader
+								ipfsHash={ipfsHash}
+								setIpfsHash={setIpfsHash}
 								selectedFiles={selectedFiles}
 								showUploadBtn={false}
 								isUpload={isUpload}
@@ -109,7 +114,11 @@ export default function CreateContractPage() {
 						</button>
 					</div>
 
-					<ContractForm contractParams={contractParams!} />
+					<ContractForm
+						contractParams={contractParams!}
+						ipfsHash={ipfsHash}
+						cancelCreateContract={cancelCreateContract}
+					/>
 				</div>
 			)}
 		</div>

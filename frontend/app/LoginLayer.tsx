@@ -1,13 +1,16 @@
 'use client';
 import { ReactNode } from 'react';
+import Modal from 'react-modal';
 import { useAccount } from 'wagmi';
 import { useIsMounted } from '@/hooks/useIsMounted';
 import LoginButton from '@/components/LoginButton';
+import Navbar from '@/components/Navbar';
+
+Modal.setAppElement('#main');
 
 export default function LoginLayer({ children }: { children: ReactNode }) {
 	const account = useAccount();
 	const isMounted = useIsMounted();
-
 	const { isConnected } = account;
 
 	return (
@@ -20,7 +23,10 @@ export default function LoginLayer({ children }: { children: ReactNode }) {
 					<LoginButton />
 				</div>
 			)}
-			<div className="min-h-screen">{children}</div>
+			<main id="main" className="min-h-screen">
+				<Navbar />
+				{children}
+			</main>
 		</>
 	);
 }

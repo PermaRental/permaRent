@@ -1,5 +1,4 @@
 'use client';
-import Camera from '@/components/Camera';
 import ContractForm, { ContractParams } from '@/components/ContractForm';
 import ImageUploader from '@/components/ImageUploader';
 import IPFSUploader from '@/components/IPFSUploader';
@@ -7,8 +6,6 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { BiX } from 'react-icons/bi';
 import Modal from 'react-modal';
-
-Modal.setAppElement('#perma-create-contract');
 
 export default function CreateContractPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -76,16 +73,6 @@ export default function CreateContractPage() {
             </div>
           </Modal>
 
-          <Camera
-            imageUrl={imageUrl ?? ''}
-            onPhotoTaken={(file, imageUrl) => {
-              setSelectedFiles(file);
-              setImageUrl(imageUrl);
-            }}
-            openModal={openModal}
-            setIsUpload={setIsUpload}
-          />
-
           {imageUrl && (
             <div className='contract-preview absolute top-0 left-0 w-full h-full z-2'>
               <Image
@@ -107,8 +94,8 @@ export default function CreateContractPage() {
         </div>
       ) : (
         <div className='confirm-contract'>
-          <div className='flex justify-between items-center gap-6 text-white bg-sky-950 rounded-bl-2xl rounded-br-2xl p-6 shadow-lg'>
-            <h1 className='text-xl font-bold'>Confirm your lease</h1>
+          <div className='page-header'>
+            <h1>Confirm your lease</h1>
             <button
               className='text-sm text-red-500 border border-red-500 rounded py-1.5 px-3 transition-colors select-none hover:bg-red-500 hover:text-white'
               aria-label='Cancel create contract'
@@ -118,11 +105,13 @@ export default function CreateContractPage() {
             </button>
           </div>
 
-          <ContractForm
-            contractParams={contractParams!}
-            ipfsHash={ipfsHash}
-            cancelCreateContract={cancelCreateContract}
-          />
+          <div className='page-body'>
+            <ContractForm
+              contractParams={contractParams!}
+              ipfsHash={ipfsHash}
+              cancelCreateContract={cancelCreateContract}
+            />
+          </div>
         </div>
       )}
     </div>

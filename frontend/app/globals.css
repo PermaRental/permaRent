@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-	--background: #f8fafc;
+	--background: #f1f5f9;
 	--foreground: #111827;
 }
 
@@ -13,11 +13,31 @@ body {
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+.nav-item {
+	@apply relative w-12 h-12 flex justify-center items-center text-slate-500 transition-colors select-none hover:text-sky-500 focus:outline-none;
+}
+.nav-item:after {
+	@apply absolute w-full h-1 -translate-x-1/2 left-1/2 bottom-0 transition-opacity bg-sky-500 opacity-0 rounded-tl rounded-tr;
+	content: '';
+}
+.nav-item.is-active {
+	@apply text-sky-500;
+}
+.nav-item.is-active::after {
+	@apply opacity-100;
+}
+.nav-item:disabled {
+	@apply pointer-events-none opacity-50;
+}
+.nav-wallet [role='button'] {
+	@apply bg-opacity-20;
+}
+
 .button {
 	@apply relative text-white bg-sky-600 text-base font-bold transition-colors px-4 py-2 rounded-lg select-none hover:bg-sky-500 focus:outline-none;
 }
 .button-cancel {
-	@apply relative text-gray-600 bg-gray-100 text-base font-bold transition-colors px-4 py-2 rounded-lg select-none hover:bg-gray-200 focus:outline-none;
+	@apply relative text-slate-600 bg-gray-100 text-base font-bold transition-colors px-4 py-2 rounded-lg select-none hover:bg-gray-200 focus:outline-none;
 }
 .button-icon {
 	@apply relative text-white bg-sky-600 text-2xl transition-colors p-6 rounded-full select-none hover:bg-sky-500 focus:outline-none;
@@ -30,14 +50,24 @@ body {
 	@apply flex flex-col gap-2;
 }
 .field label {
-	@apply text-sm text-gray-800 font-bold;
+	@apply text-sm text-slate-800 font-bold;
 }
 .field input,
 .field textarea {
-	@apply block w-full whitespace-nowrap text-ellipsis overflow-hidden border border-solid border-gray-300 rounded p-2 transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-offset-1;
+	@apply block w-full whitespace-nowrap text-ellipsis overflow-hidden border border-solid border-slate-300 rounded p-2 transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-offset-1;
 }
 .field.has-error input {
 	@apply border-red-600;
+}
+
+.page-header {
+	@apply sticky top-0 flex justify-between items-center gap-6 text-white bg-sky-950 rounded-bl-2xl rounded-br-2xl p-6 shadow-lg;
+}
+.page-header h1 {
+	@apply text-xl font-bold;
+}
+.page-body {
+	@apply flex flex-col gap-6 p-6 pb-24 overflow-y-auto;
 }
 
 .perma-account > * {

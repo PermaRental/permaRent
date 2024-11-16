@@ -1,5 +1,6 @@
 'use client';
 import AddEncryptValue from '@/components/AddEncryptValue';
+import Overlay from '@/components/Overlay';
 import VerifyButton from '@/components/VerifyButton';
 import dealService from '@/graph/deal-service';
 import { usePermaRentDeal } from '@/lib/perma-rent-deal';
@@ -27,10 +28,9 @@ export default function DealDetailPage() {
   const id = params.id;
   const { address } = useAccount();
   const [selectedLessee, setSelectedLessee] = useState<string>('');
-
   const { isDealActive } = usePermaRentDeal(id as `0x${string}`);
 
-  const { data, refetch } = useQuery({
+  const { data, refetch, isPending } = useQuery({
     queryKey: ['getDealDetail', id],
     queryFn: async () => {
       const deal = await dealService.getDealDetail(id as string);
@@ -221,6 +221,7 @@ export default function DealDetailPage() {
           />
         </div>
       </div>
+      <Overlay isVisible={isPending} />
     </div>
   );
 }

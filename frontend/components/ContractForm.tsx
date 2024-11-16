@@ -51,7 +51,7 @@ const ContractForm: React.FC<{
   contractParams: ContractParams;
   ipfsHash: string;
   cancelCreateContract: () => void;
-}> = ({ contractParams, ipfsHash }) => {
+}> = ({ contractParams, ipfsHash, cancelCreateContract }) => {
   const [isLoading, setIsloading] = useState(false);
   const {
     basicInfo: {
@@ -62,7 +62,7 @@ const ContractForm: React.FC<{
     },
     timeline: { startDate, endDate },
     property: { type, description },
-    // confidence: { warnings, suggestions },
+    confidence: { warnings, suggestions },
   } = contractParams;
 
   const {
@@ -93,6 +93,7 @@ const ContractForm: React.FC<{
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       setIsloading(true);
+
       const hash = await handleDeployDeal(
         process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`,
         address as `0x${string}`,
@@ -130,25 +131,7 @@ const ContractForm: React.FC<{
 
   return (
     <>
-      {/* {warnings?.length > 0 ? (
-        <div className='flex flex-col gap-4 p-6 items-center text-center'>
-          <p className='text-red-500 font-bold'>{warnings[0]}</p>
-          {suggestions?.length && (
-            <p className='text-gray-500 text-sm'>{suggestions[0]}</p>
-          )}
-          <button
-            className='text-red-500 border border-red-500 rounded py-1.5 px-3 transition-colors select-none hover:bg-red-500 hover:text-white'
-            aria-label='Retry create contract'
-            onClick={cancelCreateContract}
-          >
-            Retry
-          </button>
-        </div>
-      ) : ( */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className='flex flex-col gap-4 p-6 pb-24 overflow-y-auto'
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4 '>
         <div
           className={cx('field', {
             'has-error': errors && errors['type'],
@@ -278,7 +261,6 @@ const ContractForm: React.FC<{
           </button>
         </div>
       </form>
-      {/* )} */}
 
       <Overlay isVisible={isLoading}>Contract deploying...</Overlay>
     </>

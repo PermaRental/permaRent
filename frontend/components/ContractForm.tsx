@@ -49,7 +49,7 @@ const ContractForm: React.FC<{
   contractParams: ContractParams;
   ipfsHash: string;
   cancelCreateContract: () => void;
-}> = ({ contractParams, ipfsHash, cancelCreateContract }) => {
+}> = ({ contractParams, ipfsHash }) => {
   const [isLoading, setIsloading] = useState(false);
   const [transitionHash, setTransitionHash] = useState('');
   const {
@@ -61,7 +61,7 @@ const ContractForm: React.FC<{
     },
     timeline: { startDate, endDate },
     property: { type, description },
-    confidence: { warnings, suggestions },
+    // confidence: { warnings, suggestions },
   } = contractParams;
   const {
     control,
@@ -106,6 +106,8 @@ const ContractForm: React.FC<{
           dealHash: ipfsHash,
         }
       );
+
+      setTransitionHash(hash);
 
       console.log('🍎🍎🍎 create success', hash);
     } catch (error) {

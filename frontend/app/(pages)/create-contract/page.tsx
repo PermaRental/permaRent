@@ -20,9 +20,9 @@ export default function CreateContractPage() {
 
   console.log(contractParams);
 
-  const openModal = (): void => {
-    setIsModalOpen(true);
-  };
+  // const openModal = (): void => {
+  //   setIsModalOpen(true);
+  // };
 
   const closeModal = (): void => {
     setIsModalOpen(false);

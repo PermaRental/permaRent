@@ -23,11 +23,11 @@ export default function AddEncryptValue({
       contractAddress: '',
       standardContractType: '',
       chain: 'baseSepolia',
-      method: 'eth_getBalance',
-      parameters: [':userAddress', 'latest'],
+      method: '',
+      parameters: [':userAddress'],
       returnValueTest: {
-        comparator: '>=',
-        value: '0',
+        comparator: '=',
+        value: '0xc1fa14cFA7161a9a953Dd428c360fDD8a30A3bB9',
       },
     },
   ];

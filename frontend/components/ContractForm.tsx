@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { parseUnits } from 'viem';
-import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, usePublicClient } from 'wagmi';
 import Overlay from './Overlay';
 
 export type ContractParams = {
@@ -51,7 +51,6 @@ const ContractForm: React.FC<{
   cancelCreateContract: () => void;
 }> = ({ contractParams, ipfsHash }) => {
   const [isLoading, setIsloading] = useState(false);
-  const [transitionHash, setTransitionHash] = useState('');
   const {
     basicInfo: {
       rentalAmount,
@@ -63,6 +62,7 @@ const ContractForm: React.FC<{
     property: { type, description },
     // confidence: { warnings, suggestions },
   } = contractParams;
+
   const {
     control,
     register,
@@ -80,13 +80,12 @@ const ContractForm: React.FC<{
       description,
     },
   });
+
   const { address } = useAccount();
+  const client = usePublicClient();
 
   const { handleDeployDeal } = usePermaRent(
-    process.env.NEXT_PUBLIC_PERMA_RENT_ADDRESS! as `0x${string}`,
-    () => {
-      setIsloading(false);
-    }
+    process.env.NEXT_PUBLIC_PERMA_RENT_ADDRESS! as `0x${string}`
   );
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -107,21 +106,17 @@ const ContractForm: React.FC<{
         }
       );
 
-      setTransitionHash(hash);
+      const receipt = await client?.waitForTransactionReceipt({
+        hash,
+      });
 
-      console.log('🍎🍎🍎 create success', hash);
+      console.log('🍎🍎🍎 create success', hash, receipt);
     } catch (error) {
       console.error('error', error);
     } finally {
       setIsloading(false);
     }
-    // TODO: 如何知道正在上傳 & 完成?
   };
-
-  const waitForTransaction = useWaitForTransactionReceipt({
-    hash: transitionHash! as `0x${string}`,
-  });
-
   return (
     <>
       {/* {warnings?.length > 0 ? (
@@ -274,9 +269,7 @@ const ContractForm: React.FC<{
       </form>
       {/* )} */}
 
-      <Overlay isVisible={isLoading || waitForTransaction.isLoading}>
-        Contract deploying...
-      </Overlay>
+      <Overlay isVisible={isLoading}>Contract deploying...</Overlay>
     </>
   );
 };

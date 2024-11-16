@@ -102,12 +102,13 @@ export default function LesseVerifyButton({
 
     await sleep(2000);
 
-    refetch();
+    await refetch();
 
     console.log('🐼🐼🐼🐼🐼🐼🐼🐼🐼🐼', 'WorldID verification successful', txR);
   };
 
   const onSuccess = async (result: ISuccessResult) => {
+    await refetch();
     console.log('🍎🍎🍎 确认租赁成功');
   };
 

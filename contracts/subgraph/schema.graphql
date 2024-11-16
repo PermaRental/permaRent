@@ -1,0 +1,26 @@
+type Deal @entity {
+  id: ID! # Deal contract address as ID
+  paymentToken: Bytes!
+  lessor: Bytes!
+  rentalAmount: BigInt!
+  securityDeposit: BigInt!
+  paymentInterval: BigInt!
+  totalRentalPeriods: BigInt!
+  dealHash: String!
+  lessees: [Bytes!]!
+  finalLessee: Bytes
+  approvedTimestamp: BigInt
+  approvalAttestationId: BigInt
+  lastPaymentTimestamp: BigInt
+  currentPeriod: BigInt
+  failedPaymentCount: BigInt!
+  refundAmount: BigInt
+  remainingDeposit: BigInt
+  terminatedTimestamp: BigInt
+  cipherKey: String
+  keyHash: String
+  refundSettledAmount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

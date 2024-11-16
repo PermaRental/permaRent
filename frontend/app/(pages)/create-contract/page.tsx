@@ -1,4 +1,5 @@
 'use client';
+import Camera from '@/components/Camera';
 import ContractForm, { ContractParams } from '@/components/ContractForm';
 import ImageUploader from '@/components/ImageUploader';
 import IPFSUploader from '@/components/IPFSUploader';
@@ -72,6 +73,16 @@ export default function CreateContractPage() {
               />
             </div>
           </Modal>
+
+          <Camera
+            imageUrl={imageUrl ?? ''}
+            onPhotoTaken={(file, imageUrl) => {
+              setSelectedFiles(file);
+              setImageUrl(imageUrl);
+            }}
+            openModal={openModal}
+            setIsUpload={setIsUpload}
+          />
 
           {imageUrl && (
             <div className='contract-preview absolute top-0 left-0 w-full h-full z-2'>

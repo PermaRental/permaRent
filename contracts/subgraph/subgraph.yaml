@@ -1,0 +1,63 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PermaRent
+    network: base-sepolia
+    source:
+      address: "0xf44a749A2B2526E6dE5055cc2FC8d8d530BcE48A"
+      abi: PermaRent
+      startBlock: 17986413
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deal
+      abis:
+        - name: PermaRent
+          file: ./abis/PermaRent.json
+        - name: PermaRentDeal
+          file: ./abis/PermaRentDeal.json
+      eventHandlers:
+        - event: DealCreated(indexed address,indexed address,indexed address,(uint256,uint256,uint256,uint256,string))
+          handler: handleDealCreated
+      file: ./src/perma-rent.ts
+
+# Dynamic data source for PermaRentDeal contracts
+templates:
+  - kind: ethereum/contract
+    name: PermaRentDeal
+    network: base-sepolia
+    source:
+      abi: PermaRentDeal
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/deal-mapping.ts
+      entities:
+        - Deal
+      abis:
+        - name: PermaRentDeal
+          file: ./abis/PermaRentDeal.json
+      eventHandlers:
+        - event: DealSignedByLessee(indexed address,indexed address)
+          handler: handleDealSignedByLessee
+        - event: DealApprovedByLessor(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleDealApprovedByLessor
+        - event: PaymentMade(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handlePaymentMade
+        - event: PaymentFailed(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handlePaymentFailed
+        - event: DepositRefundSetted(indexed address,indexed address,uint256)
+          handler: handleDepositRefundSetted
+        - event: DepositRefunded(indexed address,indexed address,uint256,uint256)
+          handler: handleDepositRefunded
+        - event: DealTerminated(indexed address,indexed address,uint256)
+          handler: handleDealTerminated
+        - event: CipherKeySet(indexed address,indexed address,string,string)
+          handler: handleCipherKeySet

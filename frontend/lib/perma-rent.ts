@@ -44,7 +44,6 @@ export const usePermaRent = (
     eventName: 'DealCreated',
     onLogs(logs) {
       console.log('Deal created:', logs);
-      onDealCreated?.();
     },
   });
 

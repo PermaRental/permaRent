@@ -1,5 +1,5 @@
 // 创建一个辅助函数来处理 BigInt 转换
-const toBigInt = (
+export const toBigInt = (
   value: number | string | undefined,
   // @ts-ignore
   defaultValue = 0n

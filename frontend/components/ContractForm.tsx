@@ -1,6 +1,7 @@
+import { PERMARENT_ABI } from '@/lib/abis/PermaRent';
 import { usePermaRent } from '@/lib/perma-rent';
 import cx from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -106,7 +107,7 @@ const ContractForm: React.FC<{
         }
       );
 
-      const receipt = await client?.waitForTransactionReceipt({
+      const receipt = await client!.waitForTransactionReceipt({
         hash,
       });
 
@@ -117,6 +118,21 @@ const ContractForm: React.FC<{
       setIsloading(false);
     }
   };
+
+  useEffect(() => {
+    const unwatch = client!.watchContractEvent({
+      address: process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`,
+      abi: PERMARENT_ABI,
+      eventName: 'DealCreated',
+      args: { lessor: address },
+      onLogs: (logs) => console.log(logs),
+    });
+
+    return () => {
+      unwatch();
+    };
+  }, []);
+
   return (
     <>
       {/* {warnings?.length > 0 ? (

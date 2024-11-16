@@ -52,7 +52,7 @@ export default function Navbar() {
 			</button>
 			<button
 				className={cx('nav-item', {
-					'is-active': path === '/deals',
+					'is-active': path.includes('/deals'),
 				})}
 			>
 				<BiFile className="w-5 h-5" />
@@ -65,7 +65,7 @@ export default function Navbar() {
 			</button>
 			<button
 				className={cx('nav-item', {
-					'is-active': path === '/activities',
+					'is-active': path.includes('/activities'),
 				})}
 				disabled
 			>

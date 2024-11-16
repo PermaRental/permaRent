@@ -45,6 +45,11 @@ body {
 .button-icon > svg {
 	@apply w-8 h-8;
 }
+.button[disabled],
+button[disabled],
+input[disabled] {
+	@apply opacity-80 cursor-not-allowed;
+}
 
 .field {
 	@apply flex flex-col gap-2;
@@ -55,6 +60,10 @@ body {
 .field input,
 .field textarea {
 	@apply block w-full whitespace-nowrap text-ellipsis overflow-hidden border border-solid border-slate-300 rounded p-2 transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-offset-1;
+}
+.field input[readOnly],
+.field textarea[readOnly] {
+	@apply bg-transparent;
 }
 .field.has-error input {
 	@apply border-red-600;

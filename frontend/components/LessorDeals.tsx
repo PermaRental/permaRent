@@ -1,11 +1,10 @@
 import cx from 'classnames';
 import React from 'react';
+import { BiUserCircle } from 'react-icons/bi';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 import dealService from '@/graph/deal-service';
-import AddEncyptValue from './add-encypt-value';
-import MakePayment from './make-payment';
 
 export default function LessorDeals({ classNames }: { classNames?: string }) {
 	const { address } = useAccount();
@@ -26,7 +25,10 @@ export default function LessorDeals({ classNames }: { classNames?: string }) {
 			{data?.length ? (
 				<ul className="flex flex-col gap-4">
 					{data?.map((item) => (
-						<li className="border border-solid border-slate-300 rounded-lg overflow-hidden cursor-pointer">
+						<li
+							key={item.id}
+							className="border border-solid border-slate-300 rounded-lg overflow-hidden cursor-pointer"
+						>
 							<Link href={`/deals/${item.id}`} scroll={false}>
 								<div className="p-4">
 									<div className="flex flex-col items-start gap-1">
@@ -38,7 +40,8 @@ export default function LessorDeals({ classNames }: { classNames?: string }) {
 										</div>
 									</div>
 								</div>
-								<div className="text-xs text-white bg-slate-500 text-sm p-4 break-all">
+								<div className="flex items-center gap-1 text-xs text-white bg-slate-500 text-sm p-4 break-all">
+									<BiUserCircle className=" flex-none w-5 h-5" />
 									{item.finalLessee}
 								</div>
 							</Link>

@@ -26,6 +26,19 @@ body {
 	@apply w-8 h-8;
 }
 
+.field {
+	@apply flex flex-col gap-2;
+}
+.field label {
+	@apply text-sm text-gray-800 font-bold;
+}
+.field input {
+	@apply block w-full whitespace-nowrap text-ellipsis overflow-hidden border border-solid border-gray-300 rounded p-2 transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-offset-1;
+}
+.field.has-error input {
+	@apply border-red-600;
+}
+
 .perma-account > * {
 	@apply flex-col gap-4 items-center;
 }

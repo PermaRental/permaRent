@@ -6,6 +6,7 @@ import { BiX } from 'react-icons/bi';
 import Camera from '@/components/Camera';
 import ImageUploader from '@/components/ImageUploader';
 import IPFSUploader from '@/components/IPFSUploader';
+import ContractForm from '@/components/ContractForm';
 
 Modal.setAppElement('#perma-create-contract');
 
@@ -108,10 +109,7 @@ export default function CreateContractPage() {
 						</button>
 					</div>
 
-					{JSON.stringify(contractParams!, null, '\r')
-						.replace('{', '')
-						.replace('}', '')
-						.trim()}
+					<ContractForm contractParams={contractParams!} />
 				</div>
 			)}
 		</div>

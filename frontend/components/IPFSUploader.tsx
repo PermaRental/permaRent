@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PinataSDK } from 'pinata-web3';
-import { usePermaRent } from '@/lib/perma-rent';
 import { useMutation } from '@tanstack/react-query';
-import { useAccount } from 'wagmi';
 
 const pinata = new PinataSDK({
 	pinataJwt: `${process.env.NEXT_PUBLIC_PINATA_JWT}`,
@@ -23,12 +21,7 @@ const IPFSUploader: React.FC<IPFSUploaderProps> = ({
 	isUpload = false,
 	setContractParams,
 }) => {
-	const { address } = useAccount();
 	const [ipfsHash, setIpfsHash] = useState('');
-
-	const { handleDeployDeal } = usePermaRent(
-		process.env.NEXT_PUBLIC_PERMA_RENT_ADDRESS! as `0x${string}`
-	);
 
 	const uploadFileToPinataMutate = useMutation({
 		mutationKey: ['update-files-to-pinata', selectedFiles],
@@ -147,7 +140,7 @@ const IPFSUploader: React.FC<IPFSUploaderProps> = ({
 
 							{uploadFileToPinataMutate.data?.result &&
 								!extractFilesInfoMutate.isPending && (
-									<code className="w-full whitespace-pre-wrap break-all text-xs bg-gray-400 rounded-md p-4 bg-opacity-50">
+									<code className="w-10/12 whitespace-pre-wrap break-all text-xs bg-gray-400 rounded-md p-4 bg-opacity-50">
 										{JSON.stringify(
 											uploadFileToPinataMutate.data?.result!,
 											null,

@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "PermaRent": {
+      "address": "0xf44a749A2B2526E6dE5055cc2FC8d8d530BcE48A",
+      "startBlock": 17986413
+    }
+  }
+}

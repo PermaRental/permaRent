@@ -12,7 +12,7 @@ export default function AddEncryptValue({
   id: `0x${string}`;
   refetch: () => void;
 }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('7bd0e33c');
   const { encrypt } = useLit();
 
   const { writeContractAsync } = useWriteContract();
@@ -59,7 +59,7 @@ export default function AddEncryptValue({
 
     console.log('🍊🍊🍊🍊🍊🍊🍊🍊', hash, result);
 
-    refetch();
+    await refetch();
   }
 
   return (

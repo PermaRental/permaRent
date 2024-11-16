@@ -1,5 +1,6 @@
 'use client';
 import { PERMARENTDEAL_ABI } from '@/lib/abis/PermaRentDeal';
+import { sleep } from '@/utils/sleep';
 import {
   IDKitWidget,
   ISuccessResult,
@@ -64,8 +65,10 @@ export default function VerifyButton({
         hash: tx,
       });
 
+      await sleep(2000);
+
       console.log('交易成功', txR);
-      await refetch();
+      refetch();
     } catch (error) {
       console.error('Sign deal failed:', error);
 
@@ -86,6 +89,7 @@ export default function VerifyButton({
   };
 
   const onSuccess = () => {
+    refetch();
     console.log('WorldID verification successful');
   };
 

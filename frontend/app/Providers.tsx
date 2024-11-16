@@ -10,25 +10,25 @@ import { useWagmiConfig } from '@/hooks/useWagmiconfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 export default function Providers(props: {
-	children: ReactNode;
-	initialState?: State;
+  children: ReactNode;
+  initialState?: State;
 }) {
-	const config = useWagmiConfig();
-	const [queryClient] = useState(() => new QueryClient());
+  const config = useWagmiConfig();
+  const [queryClient] = useState(() => new QueryClient());
 
-	return (
-		<WagmiProvider config={config} initialState={props.initialState}>
-			<QueryClientProvider client={queryClient}>
-				<OnchainKitProvider
-					apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-					projectId={process.env.NEXT_PUBLIC_CDP_PROJECT_ID}
-					chain={baseSepolia} // add baseSepolia for testing
-				>
-					<RainbowKitProvider modalSize="compact" initialChain={baseSepolia}>
-						{props.children}
-					</RainbowKitProvider>
-				</OnchainKitProvider>
-			</QueryClientProvider>
-		</WagmiProvider>
-	);
+  return (
+    <WagmiProvider config={config} initialState={props.initialState}>
+      <QueryClientProvider client={queryClient}>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          projectId={process.env.NEXT_PUBLIC_CDP_PROJECT_ID}
+          chain={baseSepolia} // add baseSepolia for testing
+        >
+          <RainbowKitProvider modalSize='compact' initialChain={baseSepolia}>
+            {props.children}
+          </RainbowKitProvider>
+        </OnchainKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
 }

@@ -175,7 +175,7 @@ export class DealService {
     try {
       const data = await this.client.request<LesseeDealsResponse>(
         GET_LESSEE_DEALS,
-        { lesseeAddress: address }
+        { lesseeAddress: address?.toLowerCase() }
       );
       return data.deals;
     } catch (error) {
@@ -203,7 +203,7 @@ export class DealService {
     try {
       const data = await this.client.request<DealDetailResponse>(
         GET_DEAL_DETAIL,
-        { id: dealId }
+        { id: dealId?.toLowerCase() }
       );
       return data.deal;
     } catch (error) {

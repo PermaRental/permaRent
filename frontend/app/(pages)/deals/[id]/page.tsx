@@ -1,185 +1,226 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { BiLinkExternal, BiSolidStar } from 'react-icons/bi';
-import Link from 'next/link';
-import dealService from '@/graph/deal-service';
-import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
-import { useUserBalance } from '@/lib/reputation-points';
-import { useAccount } from 'wagmi';
 import AddEncryptValue from '@/components/AddEncryptValue';
-import MakePayment from '@/components/MakePayment';
 import VerifyButton from '@/components/VerifyButton';
+import dealService from '@/graph/deal-service';
+import { usePermaRentDeal } from '@/lib/perma-rent-deal';
+import { useUserBalance } from '@/lib/reputation-points';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { BiLinkExternal, BiSolidStar } from 'react-icons/bi';
+import { formatUnits } from 'viem';
+import { useAccount } from 'wagmi';
+import LesseVerifyButton from './lesse-verify-button';
 
-function truncateAddress(address, startLength = 8, endLength = 5) {
-	if (!address || address.length <= startLength + endLength) {
-		return address;
-	}
-	const start = address.slice(0, startLength);
-	const end = address.slice(-endLength);
-	return `${start}...${end}`;
+function truncateAddress(address: string, startLength = 8, endLength = 5) {
+  if (!address || address.length <= startLength + endLength) {
+    return address;
+  }
+  const start = address.slice(0, startLength);
+  const end = address.slice(-endLength);
+  return `${start}...${end}`;
 }
 
 export default function DealDetailPage() {
-	const params = useParams();
-	const id = params.id;
-	const { address } = useAccount();
-	const [isLessor, setIsLessor] = useState<boolean>(false);
-	const [isLessee, setIsLessee] = useState<boolean>(false);
-	const [selectedLessee, setSelectedLessee] = useState<string>('');
+  const params = useParams();
+  const id = params.id;
+  const { address } = useAccount();
+  const [selectedLessee, setSelectedLessee] = useState<string>('');
 
-	const { data } = useQuery({
-		queryKey: ['getDealDetail', id],
-		queryFn: () => dealService.getDealDetail(id as string),
-		enabled: !!id,
-	});
+  const { isDealActive } = usePermaRentDeal(id as `0x${string}`);
 
-	const { balance: lessorBalance } = useUserBalance(data?.lessor!);
-	const { balance: lesseeBalance } = useUserBalance(data?.finalLessee!);
+  const { data, refetch } = useQuery({
+    queryKey: ['getDealDetail', id],
+    queryFn: async () => {
+      const deal = await dealService.getDealDetail(id as string);
+      console.log(
+        '🍎🍎🍎',
+        deal,
+        address?.toLowerCase(),
+        data?.lessor?.toLowerCase()
+      );
 
-	const handleChange = (value: string) => {
-		setSelectedLessee(value);
-	};
+      if (!!data?.lessees.length) {
+        setSelectedLessee(data?.lessees[0]);
+      }
 
-	useEffect(() => {
-		if (address === data?.lessor) {
-			setIsLessor(true);
-		} else {
-			setIsLessor(false);
-		}
+      return deal;
+    },
+    enabled: !!id && !!address,
+  });
 
-		if (address === data?.finalLessee) {
-			setIsLessee(true);
-		} else {
-			setIsLessee(false);
-		}
+  const isLessee = useMemo(() => {
+    if (!address || !data) {
+      return false;
+    }
+    if (address.toLowerCase() !== data.lessor) {
+      return true;
+    }
 
-		if (!!data?.lessees.length) {
-			setSelectedLessee(data?.lessees[0]);
-		}
-	}, [address, data]);
+    return false;
+  }, [address, data]);
 
-	return (
-		<div className="page-deals">
-			<div className="page-header">
-				<h1>{truncateAddress(data?.id)}</h1>
-				<Link
-					href={`https://base-sepolia.blockscout.com/address/${data?.id}`}
-					target="_blank"
-					className="flex items-center gap-1 text-xs text-yellow-500 border border-yellow-500 rounded-md py-1 px-2 transition-colors select-none hover:bg-yellow-500 hover:text-white"
-				>
-					View onchain
-					<BiLinkExternal className="w-3 h-3" />
-				</Link>
-			</div>
+  const isLessor = useMemo(() => {
+    if (!address || !data) {
+      return false;
+    }
+    if (address.toLowerCase() === data.lessor) {
+      return true;
+    }
 
-			<div className="page-body">
-				{data?.id && isLessor && !!data?.lessees?.length && (
-					<div className="flex flex-col gap-4 pb-6 border-b border-solid border-slate-500">
-						<div className="flex items-center gap-1">
-							{data.lessees.map((lessee, index) => (
-								<>
-									<input
-										type="radio"
-										id={`lessee-${index}`}
-										name="lessee"
-										value={lessee}
-										checked={selectedLessee === lessee}
-										onChange={() => handleChange(lessee)}
-									/>
-									<label htmlFor={`lessee-${index}`}>
-										{truncateAddress(lessee, 12)}
-									</label>
-								</>
-							))}
-						</div>
-						<VerifyButton
-							id={data.id}
-							lesseeAddress={selectedLessee as `0x${string}`}
-						/>
-					</div>
-				)}
-				{data?.id && isLessee && (
-					<div className="flex flex-col gap-4 pb-6 border-b border-solid border-slate-500">
-						<MakePayment id={data.id as `0x${string}`} />
-						<AddEncryptValue id={data.id as `0x${string}`} />
-					</div>
-				)}
-				<div className="field">
-					<label htmlFor="lessor" className="flex gap-2 items-center">
-						Lessor
-						{lessorBalance !== '' && (
-							<div className="text-xs flex gap-1 items-center rounded-full border border-solid border-sky-900 px-1.5 py-0.5 opacity-80">
-								<BiSolidStar />
-								<div className="leading-none pt-px">
-									{lessorBalance ? String(lessorBalance) : 0}
-								</div>
-							</div>
-						)}
-					</label>
-					<input
-						id="lessor"
-						type="text"
-						value={truncateAddress(data?.lessor, 24)}
-						readOnly
-					/>
-				</div>
-				<div className="field">
-					<label htmlFor="final-lessee" className="flex gap-2 items-center">
-						Lessee
-						{lessorBalance !== '' && (
-							<div className="text-xs flex gap-1 items-center rounded-full border border-solid border-sky-900 px-1.5 py-0.5 opacity-80">
-								<BiSolidStar />
-								<div className="leading-none pt-px">
-									{lesseeBalance ? String(lesseeBalance) : 0}
-								</div>
-							</div>
-						)}
-					</label>
-					<input
-						id="final-lessee"
-						type="text"
-						value={truncateAddress(data?.finalLessee, 24)}
-						readOnly
-					/>
-				</div>
-				<div className="field">
-					<label htmlFor="rental-amount">Rental Amount</label>
-					<input
-						id="rental-amount"
-						type="number"
-						value={data?.rentalAmount}
-						readOnly
-					/>
-				</div>
-				<div className="field">
-					<label htmlFor="security-deposit">Security Deposit</label>
-					<input
-						id="security-deposit"
-						type="number"
-						value={data?.securityDeposit}
-						readOnly
-					/>
-				</div>
-				<div className="field">
-					<label htmlFor="payment-interval">Payment Interval</label>
-					<input
-						id="payment-interval"
-						type="number"
-						value={data?.paymentInterval}
-						readOnly
-					/>
-				</div>
-				<div className="field">
-					<label htmlFor="total-rental-periods">Total Rental Periods</label>
-					<input
-						id="total-rental-periods"
-						type="number"
-						value={data?.totalRentalPeriods}
-						readOnly
-					/>
-				</div>
-			</div>
-		</div>
-	);
+    return false;
+  }, [address, data]);
+
+  const { balance: lessorBalance } = useUserBalance(
+    data?.lessor! as `0x${string}`
+  );
+  const { balance: lesseeBalance } = useUserBalance(
+    data?.finalLessee! as `0x${string}`
+  );
+
+  const handleChange = (value: string) => {
+    setSelectedLessee(value);
+  };
+
+  return (
+    <div className='page-deals'>
+      <div className='page-header z-40'>
+        <h1>{truncateAddress(data?.id!)}</h1>
+        <Link
+          href={`https://base-sepolia.blockscout.com/address/${data?.id}`}
+          target='_blank'
+          className='flex items-center gap-1 text-xs text-yellow-500 border border-yellow-500 rounded-md py-1 px-2 transition-colors select-none hover:bg-yellow-500 hover:text-white'
+        >
+          View onchain
+          <BiLinkExternal className='w-3 h-3' />
+        </Link>
+      </div>
+
+      <div className='page-body'>
+        {data?.id && isLessor && !!data?.lessees?.length && !isDealActive && (
+          <div className='flex flex-col gap-4 pb-6 border-b border-solid border-slate-500'>
+            <div className='flex items-center gap-1'>
+              {data.lessees.map((lessee, index) => (
+                <>
+                  <input
+                    type='radio'
+                    id={`lessee-${index}`}
+                    name='lessee'
+                    value={lessee}
+                    checked={selectedLessee === lessee}
+                    onChange={() => handleChange(lessee)}
+                  />
+                  <label htmlFor={`lessee-${index}`}>
+                    {truncateAddress(lessee, 12)}
+                  </label>
+                </>
+              ))}
+            </div>
+            <VerifyButton
+              id={data.id}
+              lesseeAddress={selectedLessee as `0x${string}`}
+              refetch={refetch}
+            />
+          </div>
+        )}
+        {data?.id &&
+          isLessee &&
+          !isDealActive &&
+          !data?.lessees?.includes(address?.toLowerCase()!) && (
+            <div className='flex flex-col gap-4 pb-6 border-b border-solid border-slate-500'>
+              <LesseVerifyButton
+                id={data.id as `0x${string}`}
+                refetch={refetch}
+              />
+            </div>
+          )}
+        {data?.id &&
+          isLessee &&
+          address?.toLowerCase() === data.finalLessee?.toLowerCase() &&
+          !data.cipherKey && (
+            <div className='flex flex-col gap-4 pb-6 border-b border-solid border-slate-500'>
+              <AddEncryptValue
+                id={data.id as `0x${string}`}
+                refetch={refetch}
+              />
+            </div>
+          )}
+        <div className='field'>
+          <label htmlFor='lessor' className='flex gap-2 items-center'>
+            Lessor
+            {lessorBalance !== '' && (
+              <div className='text-xs flex gap-1 items-center rounded-full border border-solid border-sky-900 px-1.5 py-0.5 opacity-80'>
+                <BiSolidStar />
+                <div className='leading-none pt-px'>
+                  {lessorBalance ? String(lessorBalance) : 0}
+                </div>
+              </div>
+            )}
+          </label>
+          <input
+            id='lessor'
+            type='text'
+            value={truncateAddress(data?.lessor!, 24)}
+            readOnly
+          />
+        </div>
+        <div className='field'>
+          <label htmlFor='final-lessee' className='flex gap-2 items-center'>
+            Lessee
+            {lessorBalance !== '' && (
+              <div className='text-xs flex gap-1 items-center rounded-full border border-solid border-sky-900 px-1.5 py-0.5 opacity-80'>
+                <BiSolidStar />
+                <div className='leading-none pt-px'>
+                  {lesseeBalance ? String(lesseeBalance) : 0}
+                </div>
+              </div>
+            )}
+          </label>
+          <input
+            id='final-lessee'
+            type='text'
+            value={truncateAddress(data?.finalLessee!, 24)}
+            readOnly
+          />
+        </div>
+        <div className='field'>
+          <label htmlFor='rental-amount'>Rental Amount</label>
+          <input
+            id='rental-amount'
+            type='number'
+            value={formatUnits(BigInt(data?.rentalAmount ?? 0), 6)}
+            readOnly
+          />
+        </div>
+        <div className='field'>
+          <label htmlFor='security-deposit'>Security Deposit</label>
+          <input
+            id='security-deposit'
+            type='number'
+            value={formatUnits(BigInt(data?.securityDeposit ?? 0), 6)}
+            readOnly
+          />
+        </div>
+        <div className='field'>
+          <label htmlFor='payment-interval'>Payment Interval</label>
+          <input
+            id='payment-interval'
+            type='number'
+            value={formatUnits(BigInt(data?.paymentInterval ?? 0), 0)}
+            readOnly
+          />
+        </div>
+        <div className='field'>
+          <label htmlFor='total-rental-periods'>Total Rental Periods</label>
+          <input
+            id='total-rental-periods'
+            type='number'
+            value={data?.totalRentalPeriods}
+            readOnly
+          />
+        </div>
+      </div>
+    </div>
+  );
 }

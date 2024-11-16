@@ -1,7 +1,8 @@
-import { PERMARENT_ABI } from '@/lib/abis/PermaRent';
 import { usePermaRent } from '@/lib/perma-rent';
+import { formatEthereumAddress } from '@/utils';
+import { sleep } from '@/utils/sleep';
 import cx from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -111,27 +112,21 @@ const ContractForm: React.FC<{
         hash,
       });
 
-      console.log('🍎🍎🍎 create success', hash, receipt);
+      await sleep(10000);
+
+      const dealAddress = formatEthereumAddress(
+        receipt.logs?.[0]?.topics?.[1]!
+      );
+
+      console.log('🍎🍎🍎 create success', hash, receipt, dealAddress);
+
+      window.location.assign(`/deals/${dealAddress}`);
     } catch (error) {
       console.error('error', error);
     } finally {
       setIsloading(false);
     }
   };
-
-  useEffect(() => {
-    const unwatch = client!.watchContractEvent({
-      address: process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`,
-      abi: PERMARENT_ABI,
-      eventName: 'DealCreated',
-      args: { lessor: address },
-      onLogs: (logs) => console.log(logs),
-    });
-
-    return () => {
-      unwatch();
-    };
-  }, []);
 
   return (
     <>

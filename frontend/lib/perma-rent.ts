@@ -44,6 +44,7 @@ export const usePermaRent = (
     eventName: 'DealCreated',
     onLogs(logs) {
       console.log('Deal created:', logs);
+      window.location.assign(`/deals/${logs?.[0]?.args?.deal}`);
     },
   });
 

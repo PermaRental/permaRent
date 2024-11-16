@@ -96,6 +96,7 @@ const ContractForm: React.FC<{
 		);
 
 		// TODO: 如何知道正在上傳 & 完成?
+		// TODO: 確認上鏈後跳轉到 /deals/[id] 讓用戶確認結果
 	};
 
 	return (
@@ -115,10 +116,7 @@ const ContractForm: React.FC<{
 					</button>
 				</div>
 			) : (
-				<form
-					onSubmit={handleSubmit(onSubmit)}
-					className="flex flex-col gap-4 p-6 pb-24 overflow-y-auto"
-				>
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div
 						className={cx('field', {
 							'has-error': errors && errors['type'],
@@ -242,7 +240,7 @@ const ContractForm: React.FC<{
 
 					{/* TODO: 顯示合約圖片 */}
 
-					<div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex shadow-2xl border-t border-solid border-gray-100">
+					<div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex shadow-2xl border-t border-solid border-slate-100">
 						<button type="submit" className="button w-full">
 							Deploy
 						</button>

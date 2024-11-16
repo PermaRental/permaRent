@@ -8,8 +8,6 @@ import ImageUploader from '@/components/ImageUploader';
 import IPFSUploader from '@/components/IPFSUploader';
 import ContractForm from '@/components/ContractForm';
 
-Modal.setAppElement('#perma-create-contract');
-
 export default function CreateContractPage() {
 	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [ipfsHash, setIpfsHash] = useState<string>('');
@@ -103,8 +101,8 @@ export default function CreateContractPage() {
 				</div>
 			) : (
 				<div className="confirm-contract">
-					<div className="flex justify-between items-center gap-6 text-white bg-sky-950 rounded-bl-2xl rounded-br-2xl p-6 shadow-lg">
-						<h1 className="text-xl font-bold">Confirm your lease</h1>
+					<div className="page-header">
+						<h1>Confirm your lease</h1>
 						<button
 							className="text-sm text-red-500 border border-red-500 rounded py-1.5 px-3 transition-colors select-none hover:bg-red-500 hover:text-white"
 							aria-label="Cancel create contract"
@@ -114,11 +112,13 @@ export default function CreateContractPage() {
 						</button>
 					</div>
 
-					<ContractForm
-						contractParams={contractParams!}
-						ipfsHash={ipfsHash}
-						cancelCreateContract={cancelCreateContract}
-					/>
+					<div className="page-body">
+						<ContractForm
+							contractParams={contractParams!}
+							ipfsHash={ipfsHash}
+							cancelCreateContract={cancelCreateContract}
+						/>
+					</div>
 				</div>
 			)}
 		</div>

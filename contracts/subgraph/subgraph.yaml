@@ -8,9 +8,9 @@ dataSources:
     name: PermaRent
     network: base-sepolia
     source:
-      address: "0xf44a749A2B2526E6dE5055cc2FC8d8d530BcE48A"
+      address: "0x8F43636fa87da7381d1eBBf7d813D1F1fCf31027"
       abi: PermaRent
-      startBlock: 17986413
+      startBlock: 18009518
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

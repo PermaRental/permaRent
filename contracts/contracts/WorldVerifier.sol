@@ -18,7 +18,7 @@ contract WorldVerifier {
     IWorldID internal immutable worldId;
     uint256 internal immutable signNullifierHash;
     uint256 internal immutable groupId = 1;
-    mapping(uint256 => bool) internal nullifierHashes;
+    mapping(address => mapping(uint256 => bool)) internal nullifierHashes;
 
     /// @notice Deploy an instance of WorldVerifier
     /// @param _worldId The WorldID contract address
@@ -59,7 +59,7 @@ contract WorldVerifier {
     ) internal {
         // First, we make sure this person hasn't done this before
 
-        if (nullifierHashes[nullifierHash]) revert InvalidNullifier();
+        if (nullifierHashes[signal][nullifierHash]) revert InvalidNullifier();
 
         // We now verify the provided proof is valid and the user is verified by World ID
         worldId.verifyProof(
@@ -71,6 +71,6 @@ contract WorldVerifier {
         );
 
         // We now record the user has done this, so they can't do it again (sybil-resistance)
-        nullifierHashes[nullifierHash] = true;
+        nullifierHashes[signal][nullifierHash] = true;
     }
 }

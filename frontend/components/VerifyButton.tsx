@@ -22,8 +22,6 @@ export default function VerifyButton({
 
 	const { writeContractAsync, isPending, isSuccess } = useWriteContract();
 
-	console.log(lesseeAddress);
-
 	const handleSign = async (result: ISuccessResult) => {
 		setIsLoading(true);
 		setError(null);

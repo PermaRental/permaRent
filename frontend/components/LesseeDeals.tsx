@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BiUserCircle } from 'react-icons/bi';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import dealService from '@/graph/deal-service';
 
 export default function LesseeDeals({ classNames }: { classNames?: string }) {
 	const { address } = useAccount();
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	const { data } = useQuery({
 		queryKey: ['getLesseeDeals'],
@@ -15,7 +16,21 @@ export default function LesseeDeals({ classNames }: { classNames?: string }) {
 		enabled: !!address,
 	});
 
-	return (
+	useEffect(() => {
+		if (data?.length) {
+			setIsLoading(false);
+		} else {
+			setIsLoading(true);
+		}
+	}, [data]);
+
+	return isLoading ? (
+		<div className="col-start-1 col-end-2 row-start-1 row-end-2 flex flex-col items-center gap-2 text-sm text-center text-gray-800">
+			<div className="inline-flex justify-center items-center w-20 h-20">
+				<div className="loader" />
+			</div>
+		</div>
+	) : (
 		<div
 			className={cx(
 				'col-start-1 col-end-2 row-start-1 row-end-2 transition-opacity',

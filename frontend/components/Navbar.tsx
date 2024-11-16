@@ -77,7 +77,7 @@ export default function Navbar() {
 					aria-label="Go to activities"
 				/>
 			</button>
-			<button className="nav-item nav-wallet" aria-label="Open wallet settings">
+			<div className="nav-item nav-wallet">
 				<Wallet>
 					<ConnectWallet className="nav-item bg-transparent hover:bg-transparent">
 						<BiUser className="w-5 h-5" />
@@ -91,7 +91,7 @@ export default function Navbar() {
 						<WalletDropdownDisconnect />
 					</WalletDropdown>
 				</Wallet>
-			</button>
+			</div>
 		</nav>
 	);
 }

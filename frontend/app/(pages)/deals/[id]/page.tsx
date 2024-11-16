@@ -12,7 +12,9 @@ import { useMemo, useState } from 'react';
 import { BiLinkExternal, BiSolidStar } from 'react-icons/bi';
 import { formatUnits } from 'viem';
 import { useAccount } from 'wagmi';
+import ImageList from './image-list';
 import LesseVerifyButton from './lesse-verify-button';
+import ShareDeal from './share-deal';
 
 function truncateAddress(address: string, startLength = 8, endLength = 5) {
   if (!address || address.length <= startLength + endLength) {
@@ -98,6 +100,7 @@ export default function DealDetailPage() {
       </div>
 
       <div className='page-body'>
+        <ShareDeal />
         {data?.id && isLessor && !!data?.lessees?.length && !isDealActive && (
           <div className='flex flex-col gap-4 pb-6 border-b border-solid border-slate-500'>
             <div className='flex items-center gap-1'>
@@ -146,7 +149,7 @@ export default function DealDetailPage() {
               />
             </div>
           )}
-        <div className='field'>
+        <div className='field mt-4'>
           <label htmlFor='lessor' className='flex gap-2 items-center'>
             Lessor
             {lessorBalance !== '' && (
@@ -220,6 +223,8 @@ export default function DealDetailPage() {
             readOnly
           />
         </div>
+
+        {data?.id && <ImageList hash={data?.dealHash} />}
       </div>
       <Overlay isVisible={isPending} />
     </div>

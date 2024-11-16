@@ -101,7 +101,7 @@ const ContractForm: React.FC<{
           rentalAmount: parseUnits(String(data.rentalAmount), 6),
           securityDeposit: parseUnits(String(data.securityDeposit), 6),
           paymentInterval: parseUnits(
-            (data.paymentInterval ?? 0).toString(),
+            (Number(data.paymentInterval ?? 0) * 24 * 60 * 60).toString(),
             0
           ),
           totalRentalPeriods: parseUnits(String(data?.totalRentalPeriods), 0),

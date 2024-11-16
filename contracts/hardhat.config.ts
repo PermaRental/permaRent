@@ -44,6 +44,8 @@ const config: HardhatUserConfig = {
       url: 'https://base-sepolia.g.alchemy.com/v2/Uye7DOCgmKHvFB8vOHGyC_sh4ysKjQNb',
       accounts: [
         process.env.PRIVATE_KEY as string,
+        process.env.PRIVATE_KEY2 as string,
+        
       ]
     }
   }

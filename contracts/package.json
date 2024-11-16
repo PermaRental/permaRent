@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "hardhat run scripts/deploy.ts"
+    "deploy": "hardhat run scripts/deploy.ts",
+    "deploy-deal": "hardhat run scripts/callDeployDeal.ts",
+    "approve-deal": "hardhat run scripts/callApproveDeal.ts"
   },
   "keywords": [],
   "author": "",

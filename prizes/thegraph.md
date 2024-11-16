@@ -1,4 +1,4 @@
-# The Graph Judging Criteria Fitting
+# The Graph Judging Criteria List
 - 1 point: Simple event tracking entities like [`graph init`](https://thegraph.com/docs/en/quick-start/#3-initialize-your-subgraph-from-existing-contract)
     - https://github.com/PermaRental/permaRent/tree/main/contracts/subgraph  
 - 1 point: Domain entities like Accounts, Tokens, … properly filled

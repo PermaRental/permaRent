@@ -11,7 +11,10 @@ export interface DealTerms {
 import { useWatchContractEvent, useWriteContract } from 'wagmi';
 import { PERMARENT_ABI } from './abis/PermaRent';
 
-export const usePermaRent = (contractAddress: `0x${string}`) => {
+export const usePermaRent = (
+  contractAddress: `0x${string}`,
+  onDealCreated?: () => void
+) => {
   const { writeContractAsync } = useWriteContract();
 
   const handleDeployDeal = async (
@@ -20,12 +23,13 @@ export const usePermaRent = (contractAddress: `0x${string}`) => {
     terms: DealTerms
   ) => {
     try {
-      const hash = await {
+      const hash = await writeContractAsync({
         address: contractAddress,
         abi: PERMARENT_ABI,
         functionName: 'deployDeal',
+        // @ts-ignore
         args: [paymentToken, lessor, terms],
-      };
+      });
       return hash;
     } catch (error) {
       console.error('Deploy deal failed:', error);
@@ -40,6 +44,7 @@ export const usePermaRent = (contractAddress: `0x${string}`) => {
     eventName: 'DealCreated',
     onLogs(logs) {
       console.log('Deal created:', logs);
+      onDealCreated?.();
     },
   });
 
